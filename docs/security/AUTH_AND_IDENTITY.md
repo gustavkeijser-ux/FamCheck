@@ -1,6 +1,6 @@
 # Inloggning och identitet
 
-> Status: **Förslag – väntar på godkännande.** Se [ADR-0005](../adr/0005-auth-and-identity-linking.md).
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
 
 ## 1. Metoder
 

@@ -5,9 +5,9 @@ stopp och sammanfattning innan nästa milestone påbörjas.
 
 | Milestone | Innehåll | Status |
 |---|---|---|
-| M0 | Kravanalys, arkitektur, datamodell, RLS-strategi, risker | **Väntar på godkännande** |
-| M1 | Foundation – se [MILESTONE_1_FOUNDATION.md](MILESTONE_1_FOUNDATION.md) | Planerad |
-| M2 | Inloggning (Apple/Google), onboarding, hushåll och barn i UI, radering av konto, staging | – |
+| M0 | Kravanalys, arkitektur, datamodell, RLS-strategi, risker | **Klar** |
+| M1 | Foundation – se [MILESTONE_1_REPORT.md](MILESTONE_1_REPORT.md) | **Klar** – väntar på validering |
+| M2 | Staging i eu-north-1, radering av konto, onboarding (hushåll/inbjudan/barn), Apple/Google, EAS-byggen | Föreslagen |
 | M3 | Ekonomi 1: konton, transaktioner, kategorier, synlighet | – |
 | M4 | Ekonomi 2: budgetperioder, rollover, inkomster, fasta kostnader | – |
 | M5 | Sparmål och veckopeng | – |

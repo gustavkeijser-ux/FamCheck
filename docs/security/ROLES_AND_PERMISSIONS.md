@@ -1,6 +1,16 @@
 # Roller och behörigheter
 
-> Status: **Förslag – väntar på godkännande.**
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
+
+## 0. Beslut (2026-10-06)
+
+| # | Beslut |
+|---|---|
+| D2 | Owner kan **inte** läsa andra vuxnas privata data. Administrativ behörighet ≠ läsrätt till privat ekonomi. |
+| D3 | Adult kan inte bjuda in som standard. Owner kan. Flera owners är tillåtna. Individuella tilldelningar (t.ex. `members.invite` till en viss adult) är en förberedd utbyggnadspunkt i `private.household_ids_with()`. |
+| D7 | Barn: kalender, familjeaktiviteter och uppgifter/rutiner på; all ekonomi av och opt-in per barn. |
+| D9 | Minst en aktiv owner per hushåll. Blockeras i RPC:er, i en uppskjuten constraint-trigger och för kontoradering via `ON DELETE RESTRICT`. |
+| D10 | Synlighet (`private`/`adults`/`household`) är en databasregel via `private.can_view_resource()`, se [ADR-0008](../adr/0008-resource-visibility.md). |
 
 ## 1. Princip
 
@@ -49,9 +59,9 @@
 
 | Data | Regel för `child` |
 |---|---|
-| Kalender | Händelser där barnet är deltagare, plus händelser med `visible_to_children = true` om `can_view_family_events` |
-| Uppgifter | Där `assignee_member_id` = barnets egen medlem. Får bocka av om `can_complete_tasks` |
-| Rutiner | Barnets egna rutiner. Får skapa genomföranden om `can_complete_tasks` |
+| Kalender | Egna aktiviteter om `can_view_calendar` (standard på) |
+| Familjeaktiviteter | Händelser där barnet är deltagare om `can_view_family_events` (standard på) |
+| Uppgifter och rutiner | Där barnet är ansvarig. Får bocka av om `can_use_tasks_and_routines` (standard på) |
 | Veckopeng | Bara egen, om `can_view_allowance` |
 | Saldo | Bara konton där `owner_member_id` = barnet, om `can_view_own_balance` |
 | Sparmål | Bara där ägaren är barnet, om `can_view_savings_goals` |

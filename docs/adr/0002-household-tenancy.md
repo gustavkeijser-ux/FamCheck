@@ -1,6 +1,6 @@
 # ADR-0002: Hushållet som tenant
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Beslut
 - Alla tabeller med gemensam data har `household_id uuid NOT NULL` med FK och index.

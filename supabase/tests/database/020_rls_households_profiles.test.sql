@@ -121,7 +121,7 @@ select ok(
   'registrering fungerar även när metadata saknar namn'
 );
 select is(
-  (select count(*)::int from public.profiles),
+  (select count(*)::int from public.profiles p join tests.ids i on i.id = p.id and i.key like 'user:%'),
   8,
   'alla testanvändare har exakt en profil'
 );

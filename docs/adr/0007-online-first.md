@@ -1,6 +1,6 @@
 # ADR-0007: Online-först
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Beslut
 Online-först med en TanStack Query-cache som persisteras lokalt (data kan läsas

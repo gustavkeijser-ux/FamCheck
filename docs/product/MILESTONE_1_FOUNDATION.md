@@ -1,6 +1,6 @@
 # Milestone 1 – Foundation
 
-> Status: **Plan – väntar på godkännande.** Inget UI utöver det som behövs för
+> Status: **Klar 2026-10-06.** Se [MILESTONE_1_REPORT.md](MILESTONE_1_REPORT.md). Inget UI utöver det som behövs för
 > att verifiera inloggningen. Inga ekonomi-, kalender- eller rutinfunktioner.
 
 ## Mål
@@ -20,7 +20,7 @@ Varje ticket görs i ordning: planera → implementera → validera → testa �
 | **M1-01** | **Monorepo-skelett**: pnpm workspaces, `packages/config` (tsconfig strict, ESLint, Prettier), `.nvmrc`, rotskript (`lint`, `typecheck`, `test`) | `pnpm install && pnpm lint && pnpm typecheck` grönt på ren checkout |
 | **M1-02** | **CI-grund** (GitHub Actions): install, lint, typecheck, enhetstester, sökning efter hemligheter | Workflow grönt. En medvetet inlagd `service_role`-sträng får CI att fallera (testas en gång) |
 | **M1-03** | **Expo-app** i `apps/mobile`: senaste SDK, Expo Router, TypeScript strict, jest-expo, i18n-grund (sv), en enda platshållarskärm | `expo-doctor` utan fel, `tsc` grönt, ett enhetstest körs. Appen startar i dev build/simulator |
-| **M1-04** | **Miljöstrategi**: `app.config.ts` per `APP_ENV`, `env.ts` med zod, `eas.json` (development/preview/production), `.env.example`, separata bundle id:n | Appen vägrar starta med ett tydligt fel om en variabel saknas (enhetstest). Dokumenterat i ENVIRONMENTS.md |
+| **M1-04** | **Miljöstrategi**: `app.config.ts` per `EXPO_PUBLIC_APP_ENV`, `env.ts` med zod, `eas.json` (development/preview/production), `.env.example`, separata bundle id:n | Appen vägrar starta med ett tydligt fel om en variabel saknas (enhetstest). Dokumenterat i ENVIRONMENTS.md |
 | **M1-05** | **Supabase lokalt**: `supabase init`, `config.toml` (auth: OTP, manual linking på, providers via `env()` men avstängda), `seed.sql` | `supabase start` + `supabase db reset` fungerar lokalt och i CI |
 | **M1-06** | **Migrering 1 – kärnschema**: extensions (`pgcrypto`, `citext`), schemat `private`, enums, de sex tabellerna, constraints, index, `updated_at`-triggers, profil-trigger vid registrering | `db reset` grönt. Schemat stämmer med DATA_MODEL_CORE |
 | **M1-07** | **Migrering 2 – behörighet & RLS**: `private.role_permissions` + seed, `household_ids_with`, `my_member_ids`, RLS på alla tabeller, tabell- och kolumnrättigheter, `private.write_audit` | Metatester gröna: RLS påslaget överallt, `anon` saknar åtkomst, `search_path` satt |

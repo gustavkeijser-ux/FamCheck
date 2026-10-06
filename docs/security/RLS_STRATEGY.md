@@ -1,6 +1,6 @@
 # RLS-strategi
 
-> Status: **Förslag – väntar på godkännande.** Se [ADR-0004](../adr/0004-rls-capability-model.md).
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
 
 ## 1. Hotmodell
 
@@ -32,7 +32,9 @@ Appen pratar direkt med PostgREST med en publik nyckel. Vi utgår från att:
 
 ```sql
 alter table public.X enable row level security;
-alter table public.X force row level security;   -- gäller även tabellägaren
+-- FORCE används inte: tabellägaren postgres har BYPASSRLS i Supabase, så FORCE
+-- skulle inte göra någon skillnad. Skyddet gäller API-rollerna anon/authenticated.
+revoke all on table public.X from anon, authenticated;   -- neka som standard (inkl. TRUNCATE)
 
 create policy x_select on public.X for select to authenticated
   using (household_id in (select private.household_ids_with('calendar.read')));
@@ -56,8 +58,7 @@ create policy x_delete on public.X for delete to authenticated
 using (
   household_id in (select private.household_ids_with('finance.read'))
   and (
-    visibility in ('household', 'adults_only')
-    or owner_member_id in (select private.my_member_ids())   -- private: bara ägaren
+    private.can_view_resource(household_id, visibility, owner_member_id)   -- D10
   )
 )
 ```
@@ -149,3 +150,20 @@ filtrerar tyst i stället för att ge fel.
 - Ingen funktion i `public` går att köra av `anon`, utom en uttrycklig vitlista
 - `audit_log` saknar insert/update/delete för `authenticated`
 - `supabase db lint` / Security Advisor ger inga varningar
+
+### 5.5 Uppskjutna kontroller i tester
+
+pgTAP-filerna rullas tillbaka, så uppskjutna constraint-triggers (D9, barn ↔
+children-rad) körs annars aldrig. Därför avslutas varje testfil med
+`SET CONSTRAINTS ALL IMMEDIATE`, och `090_integrity_triggers` testar triggarna
+direkt. Två buggar hittades på det sättet i M1 och rättades före första deploy.
+
+### 5.6 Integrationstest
+
+`apps/mobile/src/features/auth/api/auth-service.integration.test.ts` kör mot den
+lokala stacken via PostgREST och GoTrue: e-postkod (hämtas från Mailpit) → session
+→ `create_household` → isolering mellan användare → inbjudan → utloggning.
+
+### 5.7 Faktisk testmatris (M1)
+
+Se [docs/product/MILESTONE_1_REPORT.md](../product/MILESTONE_1_REPORT.md#rls-testmatris).

@@ -1,6 +1,6 @@
 # ADR-0003: Medlem = person; `children` som tilläggstabell
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Kontext
 `managed_child` saknar inloggning men ska ha aktiviteter, rutiner, veckopeng och

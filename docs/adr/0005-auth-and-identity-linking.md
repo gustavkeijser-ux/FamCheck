@@ -1,6 +1,6 @@
 # ADR-0005: Inloggning och identity linking
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Beslut
 - Supabase Auth. E-post via engångskod (OTP). Apple/Google native via

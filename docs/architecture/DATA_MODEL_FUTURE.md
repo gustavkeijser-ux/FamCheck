@@ -18,7 +18,7 @@ reported_balance_at null, archived_at null, created_by, created_at, updated_at`
 
 - `account_type`: text + check (`checking`, `savings`, `food`, `vacation`, `allowance`, `other`)
 - `source`: text + check (`manual`, `csv`, `enable_banking`, …)
-- `visibility`: `household` | `adults_only` | `private`. `private` kräver `owner_member_id`
+- `visibility public.resource_visibility`: `household` | `adults` | `private` (D10). `private` kräver `owner_member_id`. RLS: `finance.read` **och** `private.can_view_resource(...)`
 - `unique (household_id, source, external_account_id) where external_account_id is not null`
 - Saldot räknas fram i vyn `account_balances` (security invoker, alltså RLS-skyddad)
 

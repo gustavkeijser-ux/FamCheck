@@ -1,19 +1,19 @@
 # Audit log
 
-> Status: **Förslag – väntar på godkännande.**
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
 
 ## Händelser
 
 | `action` | När | `metadata` (exempel) | M1 |
 |---|---|---|---|
-| `household.created` | `create_household` | `{ "name_length": 12 }` | ✅ |
+| `household.created` | `create_household` | `{}` | ✅ |
 | `household.updated` | `update_household` | `{ "fields": ["name"] }` | ✅ |
 | `household.deleted` | `delete_household` | `{}` | ✅ |
 | `member.invited` | `create_invitation` | `{ "invitation_id", "role", "has_email": true }` | ✅ |
 | `invitation.revoked` | `revoke_invitation` | `{ "invitation_id" }` | ✅ |
 | `member.joined` | `accept_invitation` | `{ "invitation_id", "role" }` | ✅ |
 | `member.role_changed` | `change_member_role` | `{ "from": "adult", "to": "owner" }` | ✅ |
-| `member.removed` | `remove_member` | `{ "role" }` | ✅ |
+| `member.removed` | `remove_member` | `{ "role": "adult" }` | ✅ |
 | `member.left` | `leave_household` | `{}` | ✅ |
 | `child.created` | `create_child` | `{}` | ✅ |
 | `child.permissions_changed` | `update_child_permissions` | `{ "changed": { "can_view_allowance": [false, true] } }` | ✅ |
@@ -30,6 +30,9 @@
 - Skrivs bara av `private.write_audit()`, som anropas av RPC:er och triggers.
 - Kan inte ändras eller tas bort via API:et (append-only).
 - Läsrätt: `audit.read` (owner) i hushållet.
-- **Lagringstid (förslag):** 24 månader. Händelser för raderade hushåll gallras
-  efter 90 dagar. Gallringen görs av ett `pg_cron`-jobb i en senare ticket.
-  *Kräver ditt beslut, se OPEN_QUESTIONS.*
+- **Lagringstid (D8):** 24 månader. När ett hushåll raderas nollställs aktör,
+  mål och metadata på alla dess händelser direkt. Händelsetyp och tidpunkt sparas
+  i högst 90 dagar. `private.purge_audit_log()` gallrar (testad). **Schemaläggning
+  med `pg_cron` återstår** och görs när staging finns (M2).
+- Händelsen `household.created` saknar metadata, eftersom hushållets namn är
+  onödig persondata i en logg.

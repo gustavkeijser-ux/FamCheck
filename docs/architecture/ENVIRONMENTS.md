@@ -1,23 +1,30 @@
 # Miljöstrategi
 
-> Status: **Förslag – väntar på godkännande.**
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
 
 ## Miljöer
 
 | Miljö | Supabase | App (EAS) | Bundle id / package | Data |
 |---|---|---|---|---|
-| `local` | `supabase start` (Docker) | dev client, `APP_ENV=development` | `se.famcheck.app.dev` | `seed.sql` |
-| `staging` | Eget Supabase-projekt, region `eu-north-1` (Stockholm) | profil `preview`, kanal `preview` | `se.famcheck.app.preview` | Testdata, aldrig riktig data |
+| `local` | `supabase start` (Docker) | dev client, `EXPO_PUBLIC_APP_ENV=development` | `se.famcheck.app.dev` | `seed.sql` |
+| `staging` | Eget Supabase-projekt, region `eu-north-1` (Stockholm, D6) | profil `preview`, kanal `preview` | `se.famcheck.app.preview` | Testdata, aldrig riktig data |
 | `production` | Eget Supabase-projekt, `eu-north-1` | profil `production`, kanal `production` | `se.famcheck.app` | Riktig data |
 
 Separata bundle id:n gör att alla tre varianterna kan ligga installerade
 samtidigt på samma telefon. Bundle id är en platshållare tills namnet är bestämt.
 
+## Region (D6)
+
+Staging och produktion skapas i `eu-north-1` (Stockholm). **Om regionen inte går
+att välja när projektet skapas ska arbetet stoppas**, och de EU-regioner som
+faktiskt finns tillgängliga ska dokumentas här innan en annan region väljs.
+Inga Supabase-projekt har skapats i M1.
+
 ## Variabler
 
 | Variabel | Var | Hemlig? |
 |---|---|---|
-| `APP_ENV` | EAS / lokal `.env` | Nej |
+| `EXPO_PUBLIC_APP_ENV` | `eas.json` per profil / lokal `.env.local` | Nej – styr både bundle id och runtime |
 | `EXPO_PUBLIC_SUPABASE_URL` | EAS env / `.env` | Nej |
 | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | EAS env / `.env` | Nej (publik, skyddas av RLS) |
 | `SUPABASE_SECRET_KEY` (service role) | **Bara** Edge Function-secrets och CI-secrets | **Ja** |

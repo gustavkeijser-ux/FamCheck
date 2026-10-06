@@ -1,6 +1,6 @@
 # Repository-struktur
 
-> Status: **Förslag – väntar på godkännande.** Se [ADR-0001](../adr/0001-monorepo-and-tooling.md).
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
 
 ## Översikt
 
@@ -34,7 +34,7 @@ FamCheck/
 │     │  │  └─ i18n.ts
 │     │  ├─ providers/
 │     │  └─ locales/sv.json
-│     ├─ app.config.ts                # dynamisk konfiguration per APP_ENV
+│     ├─ app.config.ts                # dynamisk konfiguration per EXPO_PUBLIC_APP_ENV
 │     ├─ eas.json                     # bygg-profiler: development / preview / production
 │     ├─ jest.config.js               # jest-expo
 │     ├─ tsconfig.json

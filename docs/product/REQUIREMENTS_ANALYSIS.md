@@ -1,8 +1,8 @@
 # Kravanalys
 
-> Status: **Förslag – väntar på godkännande.** Analys av produktspecifikationen
-> (2026-10-06). Tolkningar och avvikelser är markerade **[T]** (tolkning) och
-> **[A]** (avvikelse från specifikationen, med motivering).
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
+> Tolkningar och avvikelser är markerade **[T]** (tolkning) och **[A]** (avvikelse
+> från specifikationen, med motivering).
 
 ## 1. Sammanfattning
 

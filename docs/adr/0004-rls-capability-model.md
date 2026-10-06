@@ -1,6 +1,6 @@
 # ADR-0004: RLS med förmågemodell
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Beslut
 - Policyer kontrollerar **förmågor** (`finance.read`), inte roller.

@@ -7,12 +7,12 @@ Byggs för produktion och kommersiell lansering i Sverige (iOS + Android).
 
 ## Status
 
-**Milestone 0 – Arkitektur.** Den tekniska grunden väntar på godkännande.
-Ingen applikationskod har skrivits ännu.
+**Milestone 1 – Foundation är klar** (se [rapporten](docs/product/MILESTONE_1_REPORT.md)).
+Monorepo, Expo-app, kärnschema med RLS, behörighetsfunktioner, 270+ databastester,
+inloggning med e-postkod och CI. Inga produktfunktioner (ekonomi, kalender, barn-UI) ännu.
 
-Börja här: [docs/README.md](docs/README.md) ·
-[Beslut som behövs](docs/product/OPEN_QUESTIONS.md) ·
-[Milestone 1-plan](docs/product/MILESTONE_1_FOUNDATION.md)
+- Kom igång: [docs/architecture/DEVELOPMENT.md](docs/architecture/DEVELOPMENT.md)
+- All dokumentation: [docs/README.md](docs/README.md)
 
 ## Stack
 

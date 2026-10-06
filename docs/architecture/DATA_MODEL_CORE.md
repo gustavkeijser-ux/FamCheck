@@ -1,7 +1,8 @@
 # Datamodell – kärna (Milestone 1)
 
-> Status: **Förslag – väntar på godkännande.** Det här är designunderlag. SQL
-> skrivs först efter godkännande, i `supabase/migrations/`.
+> Status: **Godkänd 2026-10-06** (beslut D1–D10 i [OPEN_QUESTIONS](../product/OPEN_QUESTIONS.md)). Implementerad i Milestone 1.
+> SQL: `supabase/migrations/20261006120000_core_schema.sql` (struktur),
+> `…120100_permissions_and_rls.sql` (behörighet) och `…120200_household_functions.sql` (RPC).
 
 ## 1. Relationer
 
@@ -139,12 +140,16 @@ Tilläggstabell, 1:1 med en medlem som har rollen `child` eller `managed_child`.
 | `member_id` | `uuid` PK | |
 | `household_id` | `uuid` not null | FK `(household_id, member_id)` → `household_members(household_id, id)` on delete cascade |
 | `birth_date` | `date` null | Får inte ligga i framtiden. Valfritt (dataminimering) |
-| `can_view_family_events` | `boolean` not null default `true` | Ser händelser som markerats som synliga för barn |
-| `can_complete_tasks` | `boolean` not null default `true` | Får bocka av egna uppgifter och rutinsteg |
-| `can_view_allowance` | `boolean` not null default `false` | Ser sin egen veckopeng |
-| `can_view_own_balance` | `boolean` not null default `false` | Ser saldot på sina egna konton |
-| `can_view_savings_goals` | `boolean` not null default `false` | Ser sina egna sparmål |
-| `can_create_tasks` | `boolean` not null default `false` | |
+| `can_view_calendar` | `boolean` not null default `true` | D7: kalender (egna aktiviteter) |
+| `can_view_family_events` | `boolean` not null default `true` | D7: familjeaktiviteter där barnet är deltagare |
+| `can_use_tasks_and_routines` | `boolean` not null default `true` | D7: egna uppgifter och rutiner, får bocka av |
+| `can_view_allowance` | `boolean` not null default `false` | D7: egen veckopeng – explicit opt-in |
+| `can_view_own_balance` | `boolean` not null default `false` | D7: saldo på egna konton – explicit opt-in |
+| `can_view_savings_goals` | `boolean` not null default `false` | D7: egna sparmål – explicit opt-in |
+
+D7 "ekonomi generellt: av" är **inte** en flagga: hushållets och vuxnas ekonomi
+kan ett barn aldrig få se. Det spärras både av `role_permissions` (barn får aldrig
+`finance.*`) och av en check constraint på den tabellen.
 
 - Barnbehörigheterna är **explicita kolumner, inte JSON**. Då är de typade,
   har säkra standardvärden och kan läsas direkt i RLS-policyer. En ny behörighet

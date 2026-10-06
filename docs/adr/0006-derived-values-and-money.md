@@ -1,6 +1,6 @@
 # ADR-0006: Pengar, tid och härledda värden
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Beslut
 - Belopp: `*_minor bigint` (öre) + `currency char(3)`. Aldrig flyttal.

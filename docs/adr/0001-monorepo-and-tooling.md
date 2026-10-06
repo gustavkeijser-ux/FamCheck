@@ -1,6 +1,6 @@
 # ADR-0001: Monorepo med pnpm, Expo och verktyg
 
-**Status:** Föreslagen
+**Status:** Accepterad (2026-10-06)
 
 ## Kontext
 Specifikationen önskar `apps/` + `packages/` + `supabase/` och tillåter npm eller pnpm.
