@@ -1,7 +1,7 @@
 {
   "name": "famcheck",
   "private": true,
-  "description": "FamCheck – familjens gemensamma kontrollcenter",
+  "description": "FamCheck \u2013 familjens gemensamma kontrollcenter",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.12.0"
@@ -17,9 +17,10 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:lint": "supabase db lint --level warning --fail-on warning",
+    "db:lint": "supabase db lint --schema public,private --level warning --fail-on warning",
     "gen:types": "node scripts/gen-types.mjs",
-    "check:types-drift": "node scripts/gen-types.mjs --check"
+    "check:types-drift": "node scripts/gen-types.mjs --check",
+    "test:integration": "pnpm --filter @famcheck/mobile test:integration"
   },
   "devDependencies": {
     "@famcheck/config": "workspace:*",
