@@ -1,131 +1,112 @@
 /**
- * Integrationstest mot den LOKALA Supabase-stacken (pnpm db:start).
- * Körs med egen konfiguration (ren Node), t.ex. i CI:s databasjobb:
+ * Integrationstest mot en riktig Supabase-stack (lokal eller staging).
+ * Körs med egen konfiguration (ren Node):
  *   SUPABASE_PUBLISHABLE_KEY=... pnpm --filter @famcheck/mobile test:integration
+ * Mot staging sätts även SUPABASE_URL och en hemlig admin-nyckel (endast som CI-secret).
  *
- * Verifierar hela kedjan: e-postkod → session → RPC → RLS.
+ * Verifierar hela kedjan: e-postkod → session → RPC → RLS → inbjudan → radering.
  */
-import type { Database } from '@famcheck/types';
-import { createClient } from '@supabase/supabase-js';
-
+import {
+  deleteTestUsers,
+  newClient,
+  obtainOtp,
+  TEST_EMAIL_DOMAIN,
+  usesAdminOtp,
+} from '../../../test/supabase-test-env';
 import { createAuthService } from './auth-service';
 
-const API_URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
-const PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY ?? '';
-const MAILPIT_URL = process.env.MAILPIT_URL ?? 'http://127.0.0.1:54324';
-
 const describeIntegration = process.env.SUPABASE_INTEGRATION === '1' ? describe : describe.skip;
+const run = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const email = (name: string) => `${name}-${run}@${TEST_EMAIL_DOMAIN}`;
+const createdEmails: string[] = [];
 
-function memoryStorage() {
-  const data = new Map<string, string>();
-  return {
-    getItem: async (key: string) => data.get(key) ?? null,
-    setItem: async (key: string, value: string) => void data.set(key, value),
-    removeItem: async (key: string) => void data.delete(key),
-  };
-}
-
-function newClient() {
-  return createClient<Database>(API_URL, PUBLISHABLE_KEY, {
-    auth: {
-      storage: memoryStorage(),
-      persistSession: true,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
-}
-
-/** Hämtar den senaste sexsiffriga koden som skickats till adressen från Mailpit. */
-async function fetchOtpFromMailpit(email: string): Promise<string> {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const search = await fetch(
-      `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`,
-    );
-    const { messages } = (await search.json()) as { messages: { ID: string }[] };
-    const latest = messages[0];
-    if (latest) {
-      const message = (await (
-        await fetch(`${MAILPIT_URL}/api/v1/message/${latest.ID}`)
-      ).json()) as { Text: string };
-      const code = /\b(\d{6})\b/.exec(message.Text)?.[1];
-      if (code) return code;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  throw new Error(`Ingen kod hittades i Mailpit för ${email}`);
-}
-
-async function signIn(email: string) {
+async function signIn(address: string) {
+  createdEmails.push(address);
   const client = newClient();
   const auth = createAuthService(client);
-  expect(await auth.requestEmailOtp({ email })).toEqual({ ok: true, data: { email } });
-  const token = await fetchOtpFromMailpit(email);
-  const session = await auth.verifyEmailOtp({ email, token });
+  const token = await obtainOtp(address, async () => {
+    expect(await auth.requestEmailOtp({ email: address })).toEqual({
+      ok: true,
+      data: { email: address },
+    });
+  });
+  const session = await auth.verifyEmailOtp({ email: address, token });
   expect(session.ok).toBe(true);
   return { client, auth };
 }
 
-describeIntegration('e-postinloggning mot lokal Supabase', () => {
-  jest.setTimeout(30_000);
-  const run = Date.now();
+describeIntegration(
+  `e-postinloggning mot Supabase (${usesAdminOtp ? 'admin-OTP' : 'Mailpit'})`,
+  () => {
+    jest.setTimeout(60_000);
 
-  it('loggar in med kod, skapar hushåll och isoleras från andra hushåll', async () => {
-    const anna = await signIn(`anna-${run}@famcheck.test`);
-    const bo = await signIn(`bo-${run}@famcheck.test`);
-
-    // Profil skapad av triggern, synlig bara för en själv.
-    const { data: profiles } = await anna.client.from('profiles').select('display_name');
-    expect(profiles).toEqual([{ display_name: `anna-${run}` }]);
-
-    const { data: householdId, error } = await anna.client.rpc('create_household', {
-      p_name: 'Familjen Test',
+    afterAll(async () => {
+      await deleteTestUsers(createdEmails);
     });
-    expect(error).toBeNull();
-    expect(typeof householdId).toBe('string');
 
-    const { data: annasHouseholds } = await anna.client.from('households').select('id, name');
-    expect(annasHouseholds).toEqual([{ id: householdId, name: 'Familjen Test' }]);
+    it('loggar in med kod, skapar hushåll och isoleras från andra hushåll', async () => {
+      const anna = await signIn(email('anna'));
+      const bo = await signIn(email('bo'));
 
-    // Bo kan varken se hushållet eller ta sig in via API:et.
-    const { data: bosHouseholds } = await bo.client.from('households').select('id');
-    expect(bosHouseholds).toEqual([]);
-    const { error: inviteError } = await bo.client.rpc('create_invitation', {
-      p_household_id: householdId as string,
-      p_role: 'adult',
+      const { data: profiles } = await anna.client.from('profiles').select('display_name');
+      expect(profiles).toEqual([{ display_name: `anna-${run}` }]);
+
+      const { data: householdId, error } = await anna.client.rpc('create_household', {
+        p_name: 'Familjen Test',
+      });
+      expect(error).toBeNull();
+      expect(typeof householdId).toBe('string');
+
+      const { data: annasHouseholds } = await anna.client.from('households').select('id, name');
+      expect(annasHouseholds).toEqual([{ id: householdId, name: 'Familjen Test' }]);
+
+      const { data: bosHouseholds } = await bo.client.from('households').select('id');
+      expect(bosHouseholds).toEqual([]);
+      const { error: inviteError } = await bo.client.rpc('create_invitation', {
+        p_household_id: householdId as string,
+        p_role: 'adult',
+      });
+      expect(inviteError?.message).toBe('forbidden');
+
+      const { data: invitation } = await anna.client
+        .rpc('create_invitation', { p_household_id: householdId as string, p_role: 'adult' })
+        .single();
+      const { error: acceptError } = await bo.client.rpc('accept_invitation', {
+        p_token: invitation?.token ?? '',
+      });
+      expect(acceptError).toBeNull();
+      const { data: bosHouseholdsAfter } = await bo.client.from('households').select('id');
+      expect(bosHouseholdsAfter).toEqual([{ id: householdId }]);
+
+      // Städning (och kontroll): owner raderar hushållet, Bo ser det inte längre.
+      const { error: deleteError } = await anna.client.rpc('delete_household', {
+        p_household_id: householdId as string,
+        p_confirm_name: 'Familjen Test',
+      });
+      expect(deleteError).toBeNull();
+      const { data: bosHouseholdsGone } = await bo.client.from('households').select('id');
+      expect(bosHouseholdsGone).toEqual([]);
+
+      expect(await anna.auth.signOut()).toEqual({ ok: true, data: null });
+      expect(await anna.auth.getSession()).toBeNull();
     });
-    expect(inviteError?.message).toBe('forbidden');
 
-    // Anna bjuder in Bo, Bo accepterar och ser nu hushållet.
-    const { data: invitation } = await anna.client
-      .rpc('create_invitation', { p_household_id: householdId as string, p_role: 'adult' })
-      .single();
-    const { error: acceptError } = await bo.client.rpc('accept_invitation', {
-      p_token: invitation?.token ?? '',
+    it('avvisar fel kod', async () => {
+      const address = email('fel');
+      createdEmails.push(address);
+      const client = newClient();
+      const auth = createAuthService(client);
+      await obtainOtp(address, () => auth.requestEmailOtp({ email: address }));
+      await expect(auth.verifyEmailOtp({ email: address, token: '000000' })).resolves.toEqual({
+        ok: false,
+        error: 'invalid_code',
+      });
     });
-    expect(acceptError).toBeNull();
-    const { data: bosHouseholdsAfter } = await bo.client.from('households').select('id');
-    expect(bosHouseholdsAfter).toEqual([{ id: householdId }]);
 
-    // Utloggning tar bort sessionen.
-    expect(await anna.auth.signOut()).toEqual({ ok: true, data: null });
-    expect(await anna.auth.getSession()).toBeNull();
-  });
-
-  it('avvisar fel kod', async () => {
-    const client = newClient();
-    const auth = createAuthService(client);
-    const email = `fel-${run}@famcheck.test`;
-    await auth.requestEmailOtp({ email });
-    await expect(auth.verifyEmailOtp({ email, token: '000000' })).resolves.toEqual({
-      ok: false,
-      error: 'invalid_code',
+    it('nekar anonyma anrop till hushållsdata', async () => {
+      const { data, error } = await newClient().from('households').select('id');
+      expect(data).toBeNull();
+      expect(error?.code).toBe('42501');
     });
-  });
-
-  it('nekar anonyma anrop till hushållsdata', async () => {
-    const { data, error } = await newClient().from('households').select('id');
-    expect(data).toBeNull();
-    expect(error?.code).toBe('42501');
-  });
-});
+  },
+);

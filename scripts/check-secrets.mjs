@@ -21,6 +21,8 @@ const RULES = [
 const ALLOWED = {
   'apps/mobile/src/lib/env.ts': ['service_role-referens'],
   'apps/mobile/src/lib/env.test.ts': ['service_role-referens', 'Supabase secret key'],
+  // Endast integrationstester i Node/CI; filen nås aldrig från appens entry (kontrolleras av check-bundle).
+  'apps/mobile/src/test/supabase-test-env.ts': ['SUPABASE_SERVICE_ROLE/SECRET-variabel'],
 };
 
 function* walk(dir) {
