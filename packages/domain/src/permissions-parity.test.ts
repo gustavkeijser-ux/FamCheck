@@ -22,7 +22,9 @@ function readDatabasePairs(): string[] {
 
   expect(blocks, 'exakt ett role_permissions-block i migreringarna').toHaveLength(1);
   const [block = ''] = blocks;
-  return [...block.matchAll(/\('(\w+)',\s*'([\w.]+)'\)/g)].map(([, role, permission]) => `${role}:${permission}`);
+  return [...block.matchAll(/\('(\w+)',\s*'([\w.]+)'\)/g)].map(
+    ([, role, permission]) => `${role}:${permission}`,
+  );
 }
 
 describe('ROLE_PERMISSIONS ↔ private.role_permissions', () => {
