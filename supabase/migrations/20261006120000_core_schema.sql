@@ -255,7 +255,13 @@ declare
   v_role public.member_role;
   v_has_child_row boolean;
 begin
-  v_member_id := case when tg_table_name = 'children' then old.member_id else new.id end;
+  -- IF (inte CASE): fälten i OLD/NEW skiljer sig mellan tabellerna och får bara
+  -- utvärderas för den tabell som triggern faktiskt körs på.
+  if tg_table_name = 'children' then
+    v_member_id := old.member_id;
+  else
+    v_member_id := new.id;
+  end if;
 
   select m.role into v_role from public.household_members m where m.id = v_member_id;
   if not found then
@@ -291,6 +297,11 @@ security definer
 set search_path = ''
 as $$
 begin
+  -- Barnraden har redan tagits bort (t.ex. hushållet raderades) – inget att kontrollera.
+  if not exists (select 1 from public.children c where c.member_id = new.member_id) then
+    return null;
+  end if;
+
   if not exists (
     select 1 from public.household_members m
     where m.id = new.member_id and m.role in ('child', 'managed_child')
