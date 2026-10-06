@@ -3,7 +3,7 @@
 -- Särskilt: barn kan inte ändra roller, egna behörigheter eller andras data.
 -- =============================================================================
 begin;
-select plan(36);
+select plan(37);
 select tests.create_fixture();
 
 -- ---------------------------------------------------------------- household_members SELECT
@@ -136,6 +136,10 @@ select throws_ok(
   format('delete from public.children where member_id = %L', tests.id('member:managed_a')),
   '42501', null, 'barnrader kan inte raderas direkt'
 );
+
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
 
 select * from finish();
 rollback;

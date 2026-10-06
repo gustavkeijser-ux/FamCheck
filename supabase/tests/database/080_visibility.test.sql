@@ -68,5 +68,9 @@ select throws_ok(
   '42501', null, 'anon kan inte anropa can_view_resource'
 );
 
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
+
 select * from finish();
 rollback;

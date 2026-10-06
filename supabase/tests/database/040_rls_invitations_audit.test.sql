@@ -2,7 +2,7 @@
 -- RLS-matris: household_invitations och audit_log
 -- =============================================================================
 begin;
-select plan(26);
+select plan(27);
 select tests.create_fixture();
 
 -- ---------------------------------------------------------------- household_invitations SELECT
@@ -90,6 +90,10 @@ select throws_ok(
   $$ select private.household_ids_with('household.read') $$,
   '42501', null, 'anon kan inte anropa behörighetsfunktioner'
 );
+
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
 
 select * from finish();
 rollback;

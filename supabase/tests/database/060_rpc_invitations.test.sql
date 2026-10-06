@@ -274,5 +274,9 @@ select results_eq(
   'barnet får rollen child och standardbehörigheter (ekonomi av)'
 );
 
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
+
 select * from finish();
 rollback;

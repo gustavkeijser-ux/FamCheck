@@ -2,7 +2,7 @@
 -- RLS-matris: households och profiles (SELECT/INSERT/UPDATE/DELETE per roll)
 -- =============================================================================
 begin;
-select plan(31);
+select plan(32);
 select tests.create_fixture();
 
 -- ---------------------------------------------------------------- households
@@ -125,6 +125,10 @@ select is(
   8,
   'alla testanvändare har exakt en profil'
 );
+
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
 
 select * from finish();
 rollback;

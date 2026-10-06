@@ -206,5 +206,9 @@ select is(
   'B:s färska händelse finns kvar'
 );
 
+-- Uppskjutna constraint-triggers körs annars aldrig eftersom testet rullas tillbaka.
+-- Tvinga fram dem här så att alla ändringar ovan även klarar commit-kontrollerna.
+select lives_ok($$ set constraints all immediate $$, 'alla uppskjutna kontroller (D9, barnkonsistens) håller');
+
 select * from finish();
 rollback;
