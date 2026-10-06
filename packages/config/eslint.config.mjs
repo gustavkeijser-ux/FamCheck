@@ -87,6 +87,9 @@ export default tseslint.config(
   {
     files: ['apps/mobile/**/*.{ts,tsx}'],
     extends: [...tseslint.configs.strict],
+    settings: {
+      'import/resolver': { typescript: { project: 'apps/mobile/tsconfig.json' } },
+    },
     ...strictTypeScript,
   },
   {

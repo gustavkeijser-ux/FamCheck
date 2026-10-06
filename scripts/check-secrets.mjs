@@ -17,6 +17,12 @@ const RULES = [
   { name: 'Privat nyckel', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
 ];
 
+// Filer som medvetet nämner mönstren för att SKYDDA mot dem. Undantaget gäller bara angivna regler.
+const ALLOWED = {
+  'apps/mobile/src/lib/env.ts': ['service_role-referens'],
+  'apps/mobile/src/lib/env.test.ts': ['service_role-referens', 'Supabase secret key'],
+};
+
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {
     if (SKIP_DIRS.has(entry)) continue;
@@ -30,11 +36,14 @@ function* walk(dir) {
 const findings = [];
 for (const dir of SCAN_DIRS) {
   for (const file of walk(join(ROOT, dir))) {
+    const relativePath = relative(ROOT, file);
+    const allowed = ALLOWED[relativePath] ?? [];
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((line, index) => {
       for (const rule of RULES) {
+        if (allowed.includes(rule.name)) continue;
         if (rule.pattern.test(line)) {
-          findings.push(`${relative(ROOT, file)}:${index + 1}  ${rule.name}`);
+          findings.push(`${relativePath}:${index + 1}  ${rule.name}`);
         }
       }
     });
