@@ -173,7 +173,7 @@ set search_path = ''
 as $$
 declare
   v_name text := private.clean_name(p_name, 81);
-  v_fields text[] := '{}';
+  v_fields text[] := '{}'::text[];
 begin
   perform private.require_user();
   perform private.require_permission(p_household_id, 'household.update');
@@ -489,7 +489,6 @@ returns table (
   expires_at timestamptz
 )
 language plpgsql
-stable
 security definer
 set search_path = ''
 as $$
