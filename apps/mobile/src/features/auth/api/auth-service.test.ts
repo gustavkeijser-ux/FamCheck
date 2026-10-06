@@ -96,12 +96,10 @@ describe('verifyEmailOtp', () => {
 
   it('översätter otp_expired (fel eller utgången kod) till invalid_code', async () => {
     const { client } = fakeClient({
-      verifyOtp: jest
-        .fn()
-        .mockResolvedValue({
-          data: { session: null },
-          error: { code: 'otp_expired', status: 403 },
-        }),
+      verifyOtp: jest.fn().mockResolvedValue({
+        data: { session: null },
+        error: { code: 'otp_expired', status: 403 },
+      }),
     });
     await expect(
       createAuthService(client).verifyEmailOtp({ email: 'a@b.se', token: '123456' }),
@@ -113,12 +111,10 @@ describe('verifyEmailOtp', () => {
 
   it('behandlar okända serverfel som fel kod utan att läcka meddelandet', async () => {
     const { client } = fakeClient({
-      verifyOtp: jest
-        .fn()
-        .mockResolvedValue({
-          data: { session: null },
-          error: { message: 'Token has expired or is invalid' },
-        }),
+      verifyOtp: jest.fn().mockResolvedValue({
+        data: { session: null },
+        error: { message: 'Token has expired or is invalid' },
+      }),
     });
     await expect(
       createAuthService(client).verifyEmailOtp({ email: 'a@b.se', token: '123456' }),
