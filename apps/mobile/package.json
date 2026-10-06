@@ -10,7 +10,8 @@
     "ios": "expo run:ios",
     "typecheck": "tsc -p tsconfig.json",
     "test": "jest",
-    "doctor": "expo-doctor"
+    "doctor": "expo-doctor",
+    "test:integration": "SUPABASE_INTEGRATION=1 jest -c jest.integration.config.js"
   },
   "dependencies": {
     "@famcheck/domain": "workspace:*",
